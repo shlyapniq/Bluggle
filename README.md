@@ -111,43 +111,20 @@ it. That needs administrator rights, which is why this app never does it for you
 
 ### Does toggling create duplicate devices in the Sound control panel?
 
-No - not since v1.1, and undoing that is the whole reason v1.1 exists.
-
-The tempting way to script a disconnect is `BluetoothSetServiceState(..., BLUETOOTH_SERVICE_DISABLE)`.
-It does disconnect, by **uninstalling the profile**: Windows tears down the `bthenum` child
-device, and the A2DP and Hands-Free audio endpoints go with it. Re-enabling brings them back as
-*new* endpoints, so every toggle leaves another greyed-out "Disconnected" entry in the Sound
-control panel and discards everything attached to the old one - default-device choice, volume,
-enhancements, exclusive-mode flags, and any application's remembered endpoint id.
-
-This app now only ever brings the radio link up or drops it, exactly like the Connect and
-Disconnect buttons in Windows' own Bluetooth settings. Your endpoints keep their identity.
-
-If you already have a row of dead duplicates from an earlier version, clear them out with
-Device Manager → View → **Show hidden devices** → remove the greyed-out audio entries.
-
-### After I disconnect and exit, my AirPods will not auto-connect any more
-
-That was a v1.0 problem and is gone. Disconnecting no longer switches any profile off, so
-Windows keeps accepting the device's own connection attempts - including the one AirPods make
-when you open the case - whether or not the widget is running.
+No. Connecting and disconnecting only bring the radio link up or drop it, so the audio endpoints
+are never uninstalled and rebuilt, and they keep their default-device choice, volume,
+enhancements and exclusive-mode flags across a toggle.
 
 ### I never hear the connection chime
 
-Two things have to be true, and both bit this app during development.
+The chime waits `soundDelayMs` (3 s by default) before playing. The link reports connected a few
+hundred milliseconds before Windows finishes switching the default output over to the earbuds,
+so a chime played immediately comes out of whatever device was default before. Lower it if 3 s
+feels sluggish - anything from about 1500 ms up is comfortable.
 
-**The file has to be something Windows can decode.** WPF's `MediaPlayer` uses the Windows Media
-pipeline, which handles WAV on every install and everything else at the mercy of installed
-codecs. The chime that ships is a WAV for that reason. `MediaPlayer.Open` does *not* throw on a
-file it cannot read - it reports through the `MediaFailed` event - so a decode failure is
-completely silent unless something is listening for it. Anything that does fail now lands in
-`%APPDATA%\Bluggle\error.log` with the media error code.
-
-**The earbuds have to be the default output by the time it plays.** The link reports connected a
-few hundred milliseconds before Windows finishes switching the default output over, so a chime
-played the instant the connect returns comes out of whatever device was default before. That is
-what `soundDelayMs` is for. Lower it if 3 s feels sluggish; measured switch-over on this machine
-was under 300 ms, so anything from about 1500 ms up is comfortable.
+If you hear nothing at all, check `%APPDATA%\Bluggle\error.log`. Playback goes through WPF's
+`MediaPlayer`, which handles WAV on every install and anything else at the mercy of installed
+codecs; a file it cannot decode is logged there with the media error code.
 
 ### The icon is dark grey and the tooltip says Bluetooth is off
 
@@ -209,14 +186,17 @@ attempt is simply repeated every *Retry interval* until `fConnected` flips or th
 **Disconnect** sends `IOCTL_BTH_DISCONNECT_DEVICE` (`0x41000C`, from `bthioctl.h`) with the
 device's `BTH_ADDR` to each radio handle. That drops the baseband link and nothing else.
 
-Both are chosen so that **no persistent device state is ever modified** - see the duplicate
-devices note above for what happens when it is. The one exception is a profile found switched
-*off*, which has no endpoint at all; that one gets switched on (never off), at most once.
+Both are chosen so that **no persistent device state is ever modified**. The one exception is a
+profile found switched *off*, which has no endpoint at all; that one gets switched on (never
+off), at most once.
 
 The alternatives, and why not:
 
-- **`BluetoothSetServiceState` disable/enable cycling** connects reliably but rebuilds the audio
-  endpoints every time. This is what v1.0 did, and it is the bug this version fixes.
+- **`BluetoothSetServiceState` disable/enable cycling** connects reliably, but disabling a
+  profile uninstalls it: Windows tears down the `bthenum` child device and the audio endpoint
+  goes with it, coming back as a *new* endpoint on re-enable. Every toggle would leave another
+  greyed-out "Disconnected" entry in the Sound control panel and discard that endpoint's volume,
+  enhancements, exclusive-mode flags and any application's remembered endpoint id.
 - **WinRT `Windows.Devices.Bluetooth`** exposes no `Connect()` for *classic* Bluetooth devices -
   connection semantics there are BLE/GATT and RFCOMM-client only. It is a fine state source and
   a non-starter for control.
@@ -245,7 +225,8 @@ line up exactly and clamping is trivially correct.
 ├── Bluggle.sln
 ├── README.md
 ├── docs/
-│   └── widget-states.png
+│   ├── widget-states.png
+│   └── context-menu.jpg
 └── src/Bluggle/
     ├── Bluggle.exe         the published single-file build (build artifact)
     ├── Bluggle.csproj      publish settings: win-x64, self-contained, single file
@@ -255,8 +236,7 @@ line up exactly and clamping is trivially correct.
     ├── Assets/
     │   ├── Icons.xaml            headphone icon as inline path geometry (SVG equivalent in comments)
     │   ├── sound.wav             connection chime, compiled in as a WPF resource
-    │   └── sound.mp3             the original chime; despite the name it is Ogg Vorbis, which
-    │                             MediaPlayer cannot decode. Kept as source material only
+    │   └── sound.mp3             the chime's original source audio
     ├── Bluetooth/
     │   ├── NativeMethods.cs      P/Invoke: bthprops.cpl, radio IOCTLs, ws2_32 AF_BTH, user32
     │   ├── BluetoothAudioController.cs  enumeration, link wake-up, link teardown
