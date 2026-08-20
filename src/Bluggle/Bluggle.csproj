@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>false</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12</LangVersion>
+    <AssemblyName>Bluggle</AssemblyName>
+    <RootNamespace>Bluggle</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>1.1.0</Version>
+    <Product>Bluggle</Product>
+    <Company>Bluggle</Company>
+    <Description>Always-on-top widget that connects/disconnects a paired Bluetooth audio device.</Description>
+  </PropertyGroup>
+
+  <!--
+    The connection chime is compiled into the assembly rather than copied next to the exe:
+    the published build is meant to be one portable file. ConnectSound unpacks it to temp at
+    runtime, because MediaPlayer cannot play from a pack:// resource.
+
+    WAV, not the original sound.mp3. That file was actually an Ogg Vorbis stream behind an
+    ID3v2 tag, and Windows has no Ogg decoder in the WMP pipeline that WPF's MediaPlayer uses,
+    so it failed with 0xC00D11B1 every time. sound.mp3 is kept as the source material only.
+  -->
+  <ItemGroup>
+    <Resource Include="Assets\sound.wav" />
+  </ItemGroup>
+
+  <!--
+    Publish configuration. WPF cannot be trimmed (XAML resolves types by reflection),
+    so PublishTrimmed stays off; the ~70 MB self-contained exe is the price of not
+    requiring a .NET runtime install. Drop SelfContained/RuntimeIdentifier below if
+    you would rather ship framework-dependent (~1 MB, needs .NET 8 Desktop Runtime).
+  -->
+  <PropertyGroup>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <PublishTrimmed>false</PublishTrimmed>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,7 @@
+bin/
+obj/
+.vs/
+*.user
+
+# Published single-file build lives beside the source; it is still a build artifact.
+src/Bluggle/Bluggle.exe

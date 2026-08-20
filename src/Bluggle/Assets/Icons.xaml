@@ -1,0 +1,34 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Headphone icon, authored directly as path geometry in a 24 x 24 design box so the app
+        depends on no external image file at all. The three pieces are separate so the state
+        machine can stroke the band while filling or hollowing the ear cups.
+
+        Layout, in design units:
+          band      semicircle, centre (12, 14.5), radius 9  -> apex at y = 5.5
+          ear cups  5 x 8 rounded rectangles (corner radius 2) at x 2..7 and x 17..22, y 11.5..19.5
+
+        The band endpoints sit at (3, 14.5) and (21, 14.5), i.e. *inside* the cups, so the
+        stroke visually runs into them instead of stopping short.
+
+        Equivalent SVG, if you ever want it outside WPF:
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+               stroke-linecap="round">
+            <path d="M3 14.5 A9 9 0 0 1 21 14.5"/>
+            <rect x="2"  y="11.5" width="5" height="8" rx="2" stroke-width="1.6"/>
+            <rect x="17" y="11.5" width="5" height="8" rx="2" stroke-width="1.6"/>
+          </svg>
+    -->
+
+    <PathGeometry x:Key="HeadphoneBand"
+                  Figures="M3,14.5 A9,9 0 0 1 21,14.5" />
+
+    <PathGeometry x:Key="HeadphoneCupLeft"
+                  Figures="M4,11.5 H5 A2,2 0 0 1 7,13.5 V17.5 A2,2 0 0 1 5,19.5 H4 A2,2 0 0 1 2,17.5 V13.5 A2,2 0 0 1 4,11.5 Z" />
+
+    <PathGeometry x:Key="HeadphoneCupRight"
+                  Figures="M19,11.5 H20 A2,2 0 0 1 22,13.5 V17.5 A2,2 0 0 1 20,19.5 H19 A2,2 0 0 1 17,17.5 V13.5 A2,2 0 0 1 19,11.5 Z" />
+
+</ResourceDictionary>

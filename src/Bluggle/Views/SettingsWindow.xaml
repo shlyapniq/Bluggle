@@ -1,0 +1,164 @@
+<Window x:Class="Bluggle.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Bluggle - Settings"
+        Width="460" SizeToContent="Height"
+        MinHeight="420" MaxHeight="760"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="True"
+        Topmost="True"
+        ResizeMode="NoResize"
+        Background="#FF1B1D21"
+        Foreground="#FFE8EAED"
+        FontSize="12">
+
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFE8EAED" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,10,0" />
+        </Style>
+
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FF7FD4A8" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,16,0,6" />
+        </Style>
+
+        <Style x:Key="Hint" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FF9AA0A6" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,2,0,0" />
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#FFE8EAED" />
+            <Setter Property="Margin" Value="0,5,0,0" />
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#FF26292E" />
+            <Setter Property="Foreground" Value="#FFE8EAED" />
+            <Setter Property="BorderBrush" Value="#FF3C4046" />
+            <Setter Property="Padding" Value="4,3" />
+            <Setter Property="CaretBrush" Value="#FFE8EAED" />
+        </Style>
+
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="#FF2E3339" />
+            <Setter Property="Foreground" Value="#FFE8EAED" />
+            <Setter Property="BorderBrush" Value="#FF454A51" />
+            <Setter Property="Padding" Value="12,5" />
+            <Setter Property="Margin" Value="8,0,0,0" />
+        </Style>
+    </Window.Resources>
+
+    <DockPanel Margin="16">
+
+        <Border DockPanel.Dock="Bottom" Margin="0,16,0,0">
+            <DockPanel>
+                <Button DockPanel.Dock="Left" x:Name="OpenFolderButton" Margin="0"
+                        Content="Open config folder" Click="OnOpenFolder" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Cancel" IsCancel="True" Click="OnCancel" />
+                    <Button Content="Save" IsDefault="True" Click="OnSave" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+
+                <TextBlock Style="{StaticResource SectionHeader}" Text="TARGET DEVICE" Margin="0,0,0,6" />
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" x:Name="RefreshButton" Content="Refresh" Click="OnRefresh" />
+                    <ComboBox x:Name="DeviceCombo" DisplayMemberPath="DisplayName" />
+                </DockPanel>
+                <TextBlock Style="{StaticResource Hint}"
+                           Text="Only paired devices are listed. Tick 'Show all paired devices' below if a headset is missing." />
+                <CheckBox x:Name="ShowAllCheck" Content="Show all paired devices (not just audio ones)" />
+
+                <TextBlock Style="{StaticResource SectionHeader}" Text="CONNECTION BEHAVIOUR" />
+                <TextBlock Style="{StaticResource Hint}" Margin="0,0,0,4"
+                           Text="Connect and disconnect do the same thing the buttons in Windows' Bluetooth settings do: bring the radio link up, or drop it. Audio profiles are never switched off, so your speakers and microphones keep their identity, levels and default-device settings across a toggle." />
+
+                <CheckBox x:Name="EnableMissingProfilesCheck"
+                          Content="Switch on audio profiles that are off" />
+                <TextBlock Style="{StaticResource Hint}"
+                           Text="Only applies to a profile currently switched off in the device's Bluetooth properties - it has no audio endpoint while it is off, so connecting could never produce sound. Happens at most once per profile. Untick it if you disabled the Hands-Free profile on purpose to be rid of the headset mic." />
+
+                <CheckBox x:Name="PlaySoundCheck" Content="Play a sound once connected" />
+                <TextBlock Style="{StaticResource Hint}"
+                           Text="Plays the bundled chime when a connect you clicked has gone through. Connections the device makes on its own stay silent." />
+
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="90" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="State poll interval (ms)" />
+                    <TextBox   Grid.Row="0" Grid.Column="1" x:Name="PollBox" Margin="0,2" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Connect timeout (ms)" />
+                    <TextBox   Grid.Row="1" Grid.Column="1" x:Name="ConnectTimeoutBox" Margin="0,2" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Disconnect timeout (ms)" />
+                    <TextBox   Grid.Row="2" Grid.Column="1" x:Name="DisconnectTimeoutBox" Margin="0,2" />
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Retry interval (ms)" />
+                    <TextBox   Grid.Row="3" Grid.Column="1" x:Name="RetryIntervalBox" Margin="0,2" />
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Chime delay (ms)" />
+                    <TextBox   Grid.Row="4" Grid.Column="1" x:Name="SoundDelayBox" Margin="0,2" />
+                </Grid>
+                <TextBlock Style="{StaticResource Hint}"
+                           Text="Retry interval is how often the attempt is repeated while waiting - earbuds waking from deep sleep often ignore the first one. Chime delay gives Windows time to make the earbuds the default output before the sound plays; too short and it comes out of your speakers instead. 0 plays it immediately." />
+
+                <TextBlock Style="{StaticResource SectionHeader}" Text="AUDIO PROFILES" />
+                <TextBox x:Name="ServicesBox" AcceptsReturn="True" Height="54"
+                         VerticalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="11" />
+                <TextBlock Style="{StaticResource Hint}"
+                           Text="One service UUID per line: the profiles a connect wakes, and the ones expected to be switched on. Defaults are A2DP Sink (0000110b-...) and Hands-Free (0000111e-...). Add 0000110e-0000-1000-8000-00805f9b34fb for AVRCP media keys." />
+
+                <TextBlock Style="{StaticResource SectionHeader}" Text="APPEARANCE" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="90" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Widget size (px)" />
+                    <TextBox   Grid.Row="0" Grid.Column="1" x:Name="SizeBox" Margin="0,2" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Idle opacity (0.15 - 1.0)" />
+                    <TextBox   Grid.Row="1" Grid.Column="1" x:Name="OpacityBox" Margin="0,2" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Connected accent colour" />
+                    <TextBox   Grid.Row="2" Grid.Column="1" x:Name="AccentBox" Margin="0,2" />
+                </Grid>
+
+                <CheckBox x:Name="NoActivateCheck"
+                          Content="Never take focus when clicked (WS_EX_NOACTIVATE)" />
+                <TextBlock Style="{StaticResource Hint}"
+                           Text="Keeps the widget from interrupting whatever you are typing in. Can make the right-click menu slower to dismiss on some systems. Takes effect on restart." />
+
+                <CheckBox x:Name="StartupCheck" Content="Start with Windows" />
+
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</Window>
